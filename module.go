@@ -112,7 +112,7 @@ func (s *charUnitCharUnitLoad) DoCommand(ctx context.Context, cmd map[string]int
 			command := value.(string)
 			s.logger.Infof("DoCommand command=%v", command)
 			switch command {
-			case "begin":
+			case "start":
 				// Get the GPIOPin with pin number 11
 				pin, err := s.b.GPIOPinByName("11")
 				if err != nil {
