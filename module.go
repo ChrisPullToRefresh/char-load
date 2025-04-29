@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"go.viam.com/rdk/components/board"
 	"go.viam.com/rdk/logging"
@@ -102,7 +103,44 @@ func (s *charUnitCharUnitLoad) NewClientFromConn(ctx context.Context, conn rpc.C
 }
 
 func (s *charUnitCharUnitLoad) DoCommand(ctx context.Context, cmd map[string]interface{}) (map[string]interface{}, error) {
-	panic("not implemented")
+	// m.logger.Infof("DoCommand called with cmd=%v", cmd)
+	for key, value := range cmd {
+		switch key {
+		// "TurnThenCenter": "SmallLeft"
+		case "char_load":
+			s.logger.Infof("DoCommand key=%v", key)
+			command := value.(string)
+			s.logger.Infof("DoCommand command=%v", command)
+			switch command {
+			case "begin":
+				// Get the GPIOPin with pin number 11
+				pin, err := s.b.GPIOPinByName("11")
+				if err != nil {
+					return nil, err
+				}
+
+				// Set the pin to high.
+				err = pin.Set(context.Background(), true, nil)
+				if err != nil {
+					return nil, err
+				}
+
+				time.Sleep(60 * time.Second)
+
+				// Set the pin to high.
+				err = pin.Set(context.Background(), false, nil)
+				if err != nil {
+					return nil, err
+				}
+			default:
+				return nil, fmt.Errorf("unknown DoCommand value for %v = %v", key, value)
+			}
+			return nil, nil
+		default:
+			return nil, fmt.Errorf("unknown DoCommand key = %v ", key)
+		}
+	}
+	return nil, fmt.Errorf("unknown DoCommand command map: %v", cmd)
 }
 
 func (s *charUnitCharUnitLoad) Close(context.Context) error {
