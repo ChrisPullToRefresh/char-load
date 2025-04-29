@@ -1,0 +1,13 @@
+{
+  "module_name": "char-unit",
+  "namespace": "pulltorefresh",
+  "language": "go",
+  "resource_type": "service",
+  "resource_subtype": "generic",
+  "model_name": "char-unit-load",
+  "enable_cloud_build": false,
+  "initialize_git": false,
+  "generator_version": "0.1.0",
+  "generated_on": "2025-04-29T19:39:02.380423Z",
+  "module_readme_link": "README.md"
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://dl.viam.dev/module.schema.json",
+  "module_id": "pulltorefresh:char-unit",
+  "visibility": "public",
+  "url": "",
+  "description": "Modular generic service: char-unit-load",
+  "models": [
+    {
+      "api": "rdk:service:generic",
+      "model": "pulltorefresh:char-unit:char-unit-load",
+      "short_description": "Provide a short (100 characters or less) description of this model here",
+      "markdown_link": "README.md#model-pulltorefreshchar-unitchar-unit-load"
+    }
+  ],
+  "applications": null,
+  "markdown_link": "README.md",
+  "entrypoint": "bin/char-unit",
+  "first_run": "",
+  "build": {
+    "build": "make module.tar.gz",
+    "setup": "make setup",
+    "path": "bin/module.tar.gz",
+    "arch": [
+      "linux/amd64",
+      "linux/arm64"
+    ]
+  }
+}
