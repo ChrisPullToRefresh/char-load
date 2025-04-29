@@ -3,10 +3,13 @@ package charunit
 import (
 	"context"
 	"errors"
+	"fmt"
 
+	"go.viam.com/rdk/components/board"
 	"go.viam.com/rdk/logging"
 	"go.viam.com/rdk/resource"
 	"go.viam.com/rdk/services/generic"
+	"go.viam.com/utils"
 	"go.viam.com/utils/rpc"
 )
 
@@ -24,6 +27,7 @@ func init() {
 }
 
 type Config struct {
+	Board string `json:"board"`
 	/*
 		Put config attributes here. There should be public/exported fields
 		with a `json` parameter at the end of each attribute.
@@ -45,8 +49,10 @@ type Config struct {
 // The path is the JSON path in your robot's config (not the `Config` struct) to the
 // resource being validated; e.g. "components.0".
 func (cfg *Config) Validate(path string) ([]string, error) {
-	// Add config validation code here
-	return nil, nil
+	if cfg.Board == "" {
+		return nil, utils.NewConfigValidationFieldRequiredError(path, "board")
+	}
+	return []string{}, nil
 }
 
 type charUnitCharUnitLoad struct {
@@ -59,6 +65,8 @@ type charUnitCharUnitLoad struct {
 
 	cancelCtx  context.Context
 	cancelFunc func()
+
+	b board.Board
 }
 
 func newCharUnitCharUnitLoad(ctx context.Context, deps resource.Dependencies, rawConf resource.Config, logger logging.Logger) (resource.Resource, error) {
@@ -100,5 +108,26 @@ func (s *charUnitCharUnitLoad) DoCommand(ctx context.Context, cmd map[string]int
 func (s *charUnitCharUnitLoad) Close(context.Context) error {
 	// Put close code here
 	s.cancelFunc()
+	return nil
+}
+
+// Reconfigures the model. Most models can be reconfigured in place without needing to rebuild. If you need to instead create a new instance of the motor, throw a NewMustBuildError.
+func (s *charUnitCharUnitLoad) Reconfigure(ctx context.Context, deps resource.Dependencies, conf resource.Config) error {
+
+	// TODO: rename as appropriate (i.e., motorConfig)
+	serviceConfig, err := resource.NativeConfig[*Config](conf)
+	if err != nil {
+		s.logger.Warn("Error reconfiguring module with ", err)
+		return err
+	}
+
+	s.name = conf.ResourceName()
+
+	s.b, err = board.FromDependencies(deps, serviceConfig.Board)
+	if err != nil {
+		return fmt.Errorf("unable to get board %v for %v", serviceConfig.Board, s.name)
+	}
+	s.logger.Info("board is now configured to ", s.b.Name())
+
 	return nil
 }
