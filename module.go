@@ -93,6 +93,13 @@ func NewCharUnitLoad(ctx context.Context, deps resource.Dependencies, name resou
 		cancelCtx:  cancelCtx,
 		cancelFunc: cancelFunc,
 	}
+
+	if err := s.Reconfigure(ctx, deps, conf); err != nil {
+		return nil, err
+	}
+
+	return s, nil
+
 	return s, nil
 }
 
@@ -160,22 +167,19 @@ func (s *charUnitCharUnitLoad) Close(context.Context) error {
 }
 
 // Reconfigures the model. Most models can be reconfigured in place without needing to rebuild. If you need to instead create a new instance of the motor, throw a NewMustBuildError.
-func (s *charUnitCharUnitLoad) Reconfigure(ctx context.Context, deps resource.Dependencies, conf resource.Config) error {
+func (s *charUnitCharUnitLoad) Reconfigure(ctx context.Context, deps resource.Dependencies, rawConf resource.Config) error {
 
-	// TODO: rename as appropriate (i.e., motorConfig)
-	serviceConfig, err := resource.NativeConfig[*Config](conf)
+	conf, err := resource.NativeConfig[*Config](rawConf)
 	if err != nil {
-		s.logger.Warn("Error reconfiguring module with ", err)
 		return err
 	}
+	s.cfg = conf
 
-	s.name = conf.ResourceName()
-
-	s.b, err = board.FromDependencies(deps, serviceConfig.Board)
+	b, err := board.FromDependencies(deps, conf.Board)
 	if err != nil {
-		return fmt.Errorf("unable to get board %v for %v", serviceConfig.Board, s.name)
+		return fmt.Errorf("no source camera for transform pipeline  (%s): %w", conf.Board, err)
 	}
+	s.b = b
 	s.logger.Info("board is now configured to ", s.b.Name())
-
 	return nil
 }
