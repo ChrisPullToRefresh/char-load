@@ -115,28 +115,36 @@ func (s *charUnitCharUnitLoad) DoCommand(ctx context.Context, cmd map[string]int
 			s.logger.Infof("DoCommand command=%v", command)
 			switch command {
 			case "start":
+				if s.b == nil {
+					return nil, fmt.Errorf("s.b (Board component) is nil inside DoCommand")
+				}
 				// Get the GPIOPin with pin number 11
 				pin, err := s.b.GPIOPinByName("11")
 				if err != nil {
 					return nil, err
 				}
+				s.logger.Infof("DoCommand fetched the pin successfully")
 
 				// Set the pin to high.
 				err = pin.Set(context.Background(), true, nil)
 				if err != nil {
 					return nil, err
 				}
+				s.logger.Infof("DoCommand set the pin to high successfully")
 
 				time.Sleep(60 * time.Second)
+				s.logger.Infof("DoCommand finished sleeping")
 
 				// Set the pin to high.
 				err = pin.Set(context.Background(), false, nil)
 				if err != nil {
 					return nil, err
 				}
+				s.logger.Infof("DoCommand set the pin to low successfully")
 			default:
 				return nil, fmt.Errorf("unknown DoCommand value for %v = %v", key, value)
 			}
+
 			return nil, nil
 		default:
 			return nil, fmt.Errorf("unknown DoCommand key = %v ", key)
