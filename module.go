@@ -73,18 +73,20 @@ type charUnitCharUnitLoad struct {
 }
 
 func newCharUnitCharUnitLoad(ctx context.Context, deps resource.Dependencies, rawConf resource.Config, logger logging.Logger) (resource.Resource, error) {
-	conf, err := resource.NativeConfig[*Config](rawConf)
-	if err != nil {
-		return nil, err
-	}
 
-	return NewCharUnitLoad(ctx, deps, rawConf.ResourceName(), conf, logger)
+	return NewCharUnitLoad(ctx, deps, rawConf.ResourceName(), rawConf, logger)
 
 }
 
-func NewCharUnitLoad(ctx context.Context, deps resource.Dependencies, name resource.Name, conf *Config, logger logging.Logger) (resource.Resource, error) {
+func NewCharUnitLoad(ctx context.Context, deps resource.Dependencies, name resource.Name, rawConf resource.Config, logger logging.Logger) (resource.Resource, error) {
 
 	cancelCtx, cancelFunc := context.WithCancel(context.Background())
+
+	conf, err := resource.NativeConfig[*Config](rawConf)
+	if err != nil {
+		cancelFunc()
+		return nil, err
+	}
 
 	s := &charUnitCharUnitLoad{
 		name:       name,
@@ -94,11 +96,9 @@ func NewCharUnitLoad(ctx context.Context, deps resource.Dependencies, name resou
 		cancelFunc: cancelFunc,
 	}
 
-	if err := s.Reconfigure(ctx, deps, conf); err != nil {
+	if err := s.Reconfigure(ctx, deps, rawConf); err != nil {
 		return nil, err
 	}
-
-	return s, nil
 
 	return s, nil
 }
@@ -168,12 +168,10 @@ func (s *charUnitCharUnitLoad) Close(context.Context) error {
 
 // Reconfigures the model. Most models can be reconfigured in place without needing to rebuild. If you need to instead create a new instance of the motor, throw a NewMustBuildError.
 func (s *charUnitCharUnitLoad) Reconfigure(ctx context.Context, deps resource.Dependencies, rawConf resource.Config) error {
-
 	conf, err := resource.NativeConfig[*Config](rawConf)
 	if err != nil {
 		return err
 	}
-	s.cfg = conf
 
 	b, err := board.FromDependencies(deps, conf.Board)
 	if err != nil {
