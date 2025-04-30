@@ -50,10 +50,12 @@ type Config struct {
 // The path is the JSON path in your robot's config (not the `Config` struct) to the
 // resource being validated; e.g. "components.0".
 func (cfg *Config) Validate(path string) ([]string, error) {
+	deps := []string{cfg.Board}
+
 	if cfg.Board == "" {
 		return nil, utils.NewConfigValidationFieldRequiredError(path, "board")
 	}
-	return []string{}, nil
+	return deps, nil
 }
 
 type charUnitCharUnitLoad struct {
