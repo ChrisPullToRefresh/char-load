@@ -166,7 +166,6 @@ func bioCharProcess(s *charUnitCharUnitLoad) {
 		return
 	}
 	s.logger.Infof("DoCommand set the pin to low successfully")
-	return
 }
 
 func (s *charUnitCharUnitLoad) Close(context.Context) error {
